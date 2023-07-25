@@ -37,7 +37,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         workManager = WorkManager.getInstance(applicationContext)
-        Timber.e("workManager:$workManager")
+
         setContent {
             WorkmanagerTheme {
                 val workerResult = viewModel.workId?.let { id ->
@@ -61,20 +61,20 @@ class MainActivity : ComponentActivity() {
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Timber.e("viewModel.uncompressedUri:${viewModel.uncompressedUri}")
-                    viewModel.uncompressedUri?.let { 
+                    viewModel.uncompressedUri?.let {
                         Text(text = "Uncompressed photo:")
                         AsyncImage(model = it, contentDescription = null)
                     }
                     Spacer(modifier = Modifier.height(16.dp))
-                    Timber.e("viewModel.compressedBitmap:${viewModel.compressedBitmap}")
-                    viewModel.compressedBitmap?.let { 
+                    viewModel.compressedBitmap?.let {
                         Text(text = "Compressed photo:")
                         Image(bitmap = it.asImageBitmap(), contentDescription = null)
                     }
                 }
             }
         }
+
+        onNewIntent(intent)
     }
 
     override fun onNewIntent(intent: Intent?) {
@@ -90,7 +90,7 @@ class MainActivity : ComponentActivity() {
             .setInputData(
                 workDataOf(
                     PhotoCompressionWorker.KEY_CONTENT_URI to uri.toString(),
-                    PhotoCompressionWorker.KEY_COMPRESSION_THRESHOLD to 1024 * 20L
+                    PhotoCompressionWorker.KEY_COMPRESSION_THRESHOLD to 1024 * 20L  // 20KB
                 )
             )
             .setConstraints(Constraints(

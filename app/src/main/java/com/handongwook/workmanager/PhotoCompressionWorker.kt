@@ -21,13 +21,13 @@ class PhotoCompressionWorker(
 
     override suspend fun doWork(): Result {
         return withContext(Dispatchers.IO) {
-            Timber.e("doWork")
             val stringUri = params.inputData.getString(KEY_CONTENT_URI)
             val compressionThresholdInBytes = params.inputData.getLong(
                 KEY_COMPRESSION_THRESHOLD,
                 0L
             )
             val uri = Uri.parse(stringUri)
+            Timber.e("uri:$uri")
             val bytes = appContext.contentResolver.openInputStream(uri)?.use {
                 it.readBytes()
             } ?: return@withContext Result.failure()
@@ -42,11 +42,11 @@ class PhotoCompressionWorker(
                     outputBytes = outputStream.toByteArray()
                     quality -= (quality * 0.1).roundToInt()
                 }
+                Timber.e("outputBytes.size:${outputBytes.size} quality:$quality")
             } while (outputBytes.size > compressionThresholdInBytes && quality > 5)
 
             val file = File(appContext.cacheDir, "${params.id}.jpg")
             file.writeBytes(outputBytes)
-            Timber.e("file.absoluteFile:${file.absoluteFile}")
             Result.success(
                 workDataOf(
                     KEY_RESULT_PATH to file.absolutePath
